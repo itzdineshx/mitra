@@ -98,6 +98,16 @@ Decision: enable `com.google.ai.edge.litertlm:litertlm-android:0.18.0` for on-de
 Why: advertised RAM is never reported in full by the kernel; realistic tolerances prevent falsely downgrading 6 GB devices.
 Consequences: `FakeModel` remains test default; `LiteRtLocalModel` executes off-thread when real model file is placed in `Android/data/com.mitra.app/files/models/`.
 
+**D-019 · In-app model downloader and management (T06)** — Accepted · 2026-11-21
+Decision: the mobile app directly downloads, verifies and manages the on-device AI model (`ModelDownloader`, `ModelFiles`, `OnDeviceAiCard`).
+- Source: official Hugging Face URL for `gemma-4-E2B-it.litertlm` (2.58 GB).
+- Integrity: pinned Git LFS SHA-256 (`181938105e0eefd105961417e8da75903eacda102c4fce9ce90f50b97139a63c`).
+- Resumable: downloads to `cacheDir/downloads/*.part` using HTTP Range headers with manual 30x redirect following.
+- Storage check: validates $\ge 3$ GB free space before starting; deletes `.part` on checksum failure.
+- UI: Aurora dark card with real-time progress (bytes, percent, speed MB/s), pause/resume, cancel, delete model confirmation, and Wi-Fi only option.
+Why: users need to download and manage the 2.58 GB model on their mobile device without requiring ADB or a developer PC.
+Consequences: adds `android.permission.INTERNET` and `ACCESS_NETWORK_STATE` to `AndroidManifest.xml` (aligned with `PRIVACY.md` §What Mitra needs).
+
 ---
 
 ## Open questions (owner to decide)

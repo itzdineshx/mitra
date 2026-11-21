@@ -91,7 +91,7 @@ fun DebugSection(modifier: Modifier = Modifier) {
     }
 }
 
-private suspend fun runModelBenchmark(context: Context): String =
+suspend fun runModelBenchmark(context: Context): String =
     withContext(Dispatchers.IO) {
         val modelFile = ModelFiles.findModelFile(context)
         val isRealModel = modelFile != null
@@ -129,8 +129,11 @@ private suspend fun runModelBenchmark(context: Context): String =
 
         var isValidJson = false
         var actionType: String? = null
+        val jsonBlock = extractJsonBlock(response)
+        Log.i("MitraModel", "Raw response from model: '$response'")
+        Log.i("MitraModel", "Extracted JSON block: '$jsonBlock'")
         try {
-            val step = json.decodeFromString<ModelStep>(response)
+            val step = json.decodeFromString<ModelStep>(jsonBlock)
             isValidJson = true
             actionType = step.type.name
         } catch (_: Throwable) {
@@ -173,3 +176,16 @@ private suspend fun runModelBenchmark(context: Context): String =
             appendLine("Memory used: $memUsedMb MB")
         }
     }
+
+private fun extractJsonBlock(raw: String): String {
+    val trimmed = raw.trim()
+    val start = trimmed.indexOf('{')
+    val end = trimmed.lastIndexOf('}')
+    val json =
+        if (start != -1 && end != -1 && end > start) {
+            trimmed.substring(start, end + 1)
+        } else {
+            trimmed
+        }
+    return json.replace(Regex("\"type\"\\s*:\\s*\"([A-Za-z_]+)\\|[^\"]*\""), "\"type\": \"$1\"")
+}

@@ -10,4 +10,26 @@
     <string name="service_off_button">Open settings</string>
     <string name="restricted_hint">On Android 13+, if the switch is greyed out: App info → ⋮ → Allow restricted settings.</string>
     <string name="service_on">Ready. Accessibility is on.</string>
+
+    <!-- On-Device AI / Model Management (UI_SPEC §6.5, T06) -->
+    <string name="model_title">On-device AI</string>
+    <string name="model_name">Gemma 4 E2B</string>
+    <string name="model_desc">2.58 GB · works offline</string>
+    <string name="model_status_ready">Ready</string>
+    <string name="model_status_not_downloaded">Not downloaded</string>
+    <string name="model_status_downloading">Downloading %1$d%%</string>
+    <string name="model_status_paused">Paused</string>
+    <string name="model_status_verifying">Verifying checksum…</string>
+    <string name="model_status_error">Error</string>
+    <string name="model_btn_download">Download model</string>
+    <string name="model_btn_pause">Pause</string>
+    <string name="model_btn_resume">Resume</string>
+    <string name="model_btn_cancel">Cancel</string>
+    <string name="model_btn_delete">Delete model</string>
+    <string name="model_btn_test">Model test</string>
+    <string name="model_wifi_only">Download over Wi-Fi only</string>
+    <string name="model_delete_dialog_title">Delete AI model?</string>
+    <string name="model_delete_dialog_body">This will delete the 2.58 GB Gemma 4 E2B model file from your device. You can download it again anytime.</string>
+    <string name="model_delete_confirm">Delete</string>
+    <string name="model_delete_cancel">Keep</string>
 </resources>

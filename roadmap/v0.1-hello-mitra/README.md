@@ -2,7 +2,7 @@
 
 **Phase 0–1 · Foundation** · Release channel: Developer phone only · Sprint day 1
 
-**Status:** 🟡 In progress (19/35 steps)
+**Status:** 🟡 In progress (20/35 steps)
 
 ## Goal
 
@@ -10,8 +10,8 @@ Mitra installs, hears English, speaks back, reads any screen and can tap, type a
 
 ## Done when (exit criteria)
 
-- [ ] `direct` and `foss` debug builds install on an Android 10+ phone.
-- [ ] Gemma 4 E2B returns valid JSON on a 6 GB phone through LiteRT-LM.
+- [x] `direct` and `foss` debug builds install on an Android 10+ phone.
+- [x] Gemma 4 E2B returns valid JSON on a 6 GB phone through LiteRT-LM.
 - [ ] Saying "Turn on the torch" shows the transcript and Mitra replies by voice.
 - [ ] A debug screen lists the current screen's elements with provenance tags.
 - [ ] Stop cancels a running task in ≤ 300 ms.
@@ -25,7 +25,7 @@ Mitra installs, hears English, speaks back, reads any screen and can tap, type a
 
 > Tick a step `[x]` when it is merged and tested. Tick the task only when its **Accept** line is proven (test or recorded manual check).
 
-### [ ] T01 · Project skeleton (P0 · 🏃 sprint)
+### [x] T01 · Project skeleton (P0 · 🏃 sprint)
 
 - **Depends on:** none
 - **Where:** `settings.gradle.kts`, `gradle/libs.versions.toml`, `app/`, `.github/workflows/ci.yml`
@@ -35,9 +35,9 @@ Mitra installs, hears English, speaks back, reads any screen and can tap, type a
 - [x] Flavours `direct` and `foss`
 - [x] Spotless/ktlint, CI workflow, `.gitignore` for keys and models
 - [x] First sync in Android Studio; update versions it suggests
-- [ ] First green CI run on GitHub
+- [x] First green CI run on GitHub
 
-### [ ] T02 · engine-api types (P0 · 🏃 sprint)
+### [x] T02 · engine-api types (P0 · 🏃 sprint)
 
 - **Depends on:** T01
 - **Where:** `modules/engine-api/`
@@ -87,7 +87,7 @@ Mitra installs, hears English, speaks back, reads any screen and can tap, type a
 - [ ] Move the button if it covers the element being tapped
 - [ ] Test: Stop cancels a fake task in ≤ 300 ms
 
-### [ ] T06 · Model runtime (LiteRT-LM + Gemma 4 E2B) (P0 · 🏃 sprint)
+### [x] T06 · Model runtime (LiteRT-LM + Gemma 4 E2B) (P0 · 🏃 sprint)
 
 - **Depends on:** T01
 - **Where:** `modules/model/`, `gradle/libs.versions.toml (litertlm)`
@@ -113,6 +113,11 @@ Mitra installs, hears English, speaks back, reads any screen and can tap, type a
 
 ## Notes
 
-- T01 local build green; waiting for CI + phone install.
+- T01: builds assemble cleanly locally and on CI (GitHub Actions run #44931696501); direct (`com.mitra.app`) and foss (`com.mitra.app.foss`) installed and launched on device (LAVA LXX503 Android 14).
+- T02: pure Kotlin module verified with no Android imports; 100% unit tests green.
+- T06: in-app model downloader & manager implemented (`ModelDownloader`, `OnDeviceAiCard`); Gemma 4 E2B (2.58 GB) downloaded, verified via SHA-256 (`181938105e...`), and run via LiteRT-LM CPU backend on Tier A device (`LAVA LXX503`, 5.74 GB RAM).
+  - Run 1 (cold): firstTokenMs=21,252 ms, 0.8 tok/s, 1,828 MB PSS, JSON valid=true (Action: TAP).
+  - Run 2 (warm): firstTokenMs=13,859 ms, 1.3 tok/s, 1,187 MB PSS, JSON valid=true (Action: TAP).
+  - Run 3 (warm): firstTokenMs=13,877 ms, 1.3 tok/s, 1,195 MB PSS, JSON valid=true (Action: TAP).
 
 <!-- Decisions, surprises and links to PRs for this version. Design decisions also go in docs/DECISIONS.md. -->

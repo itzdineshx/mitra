@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -21,13 +23,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mitra.app.debug.DebugSection
+import com.mitra.app.debug.runModelBenchmark
 import com.mitra.engine.access.MitraAccessibilityService
 import com.mitra.ui.MitraTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private val serviceOn = mutableStateOf(false)
@@ -58,8 +64,18 @@ private fun HomeScreen(
     onTask: (String) -> Unit,
 ) {
     var task by remember { mutableStateOf("") }
+    val scrollState = rememberScrollState()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var isModelRunning by remember { mutableStateOf(false) }
+    var modelResultText by remember { mutableStateOf<String?>(null) }
+
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+                .verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(stringResource(R.string.home_greeting), style = MaterialTheme.typography.headlineSmall)
@@ -84,6 +100,25 @@ private fun HomeScreen(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Button(onClick = { onTask(task) }, enabled = task.isNotBlank()) { Text(stringResource(R.string.home_go)) }
             OutlinedButton(onClick = { /* T07: speech input */ }) { Text(stringResource(R.string.home_mic)) }
+        }
+        OnDeviceAiCard(
+            onRunModelTest = {
+                if (isModelRunning) return@OnDeviceAiCard
+                isModelRunning = true
+                scope.launch {
+                    modelResultText = runModelBenchmark(context)
+                    isModelRunning = false
+                }
+            },
+        )
+        modelResultText?.let {
+            Card(Modifier.fillMaxWidth()) {
+                Text(
+                    text = it,
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
         }
         DebugSection()
     }
