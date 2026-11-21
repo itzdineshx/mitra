@@ -1,0 +1,6 @@
+Stop Overlay Latency Benchmark (10 runs):
+Min: 0.60 ms
+Median: 0.72 ms
+Max: 2.01 ms
+Requirement: <= 300 ms -> PASS
+Individual runs: [2.01, 0.87, 0.63, 0.71, 0.66, 1.01, 0.75, 0.73, 0.6, 0.6]
