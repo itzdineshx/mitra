@@ -18,7 +18,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Pure Kotlin tests (trust engine must never regress)
         run: ./gradlew :engine-api:test :web:test :trust:test :plugins:test
       - name: Formatting
@@ -33,7 +33,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Build both flavours
         run: ./gradlew assembleDirectDebug assembleFossDebug lintDirectDebug
       - name: FOSS build must not contain Google Play Services or Firebase
