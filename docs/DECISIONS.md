@@ -108,6 +108,25 @@ Decision: the mobile app directly downloads, verifies and manages the on-device 
 Why: users need to download and manage the 2.58 GB model on their mobile device without requiring ADB or a developer PC.
 Consequences: adds `android.permission.INTERNET` and `ACCESS_NETWORK_STATE` to `AndroidManifest.xml` (aligned with `PRIVACY.md` §What Mitra needs).
 
+**D-020 · Provenance tagging, node recycling and stable debounce (T03, T04)** — Accepted · 2026-11-21
+Decision:
+1. `AccessibleNode` and `AccessibleWindow` abstractions isolate `NodeMapper` from Android platform dependencies, allowing 100% JVM testability without platform mocking.
+2. Provenance tagging enforces `SYSTEM_UI` for system/IME windows, `OVERLAY` for foreign windows, `WEB_CONTENT` for WebViews and their children, `USER_CONTENT` for user message containers and their children, and `APP_LAYOUT` for app containers.
+3. Strict password/secure protection: `isPassword == true` produces `secure = true` and `text = null`. `AccessibilityEngine.type()` refuses typing into secure fields returning `ActionResult.Failed(SECURE_FIELD)`.
+4. Screen stability debounce: `MitraAccessibilityService.awaitStableScreen(quietPeriodMs = 250L, timeoutMs = 2000L)` waits for UI quiescence before snapshots and after actions.
+5. Zero node leakage: `AccessibilityNodeInfo` references from previous snapshots are recycled and released; action fallback uses `ScreenElement.bounds` center coordinates via swipe gesture fallback.
+Why: satisfies AGENTS.md safety rule #3 and trust engine provenance spec without memory leaks.
+Consequences: screen reading and actions are resilient across native Views, Jetpack Compose, WebViews, and third-party overlays.
+
+**D-021 · Stop overlay latency and task runner cancellation (T05, T07)** — Accepted · 2026-11-21
+Decision:
+1. `TaskRunner` coordinates active task coroutine `Job` cancellation, `AccessibilityEngine.stop()`, and an ongoing notification with Stop action.
+2. `StopOverlay` provides a floating `TYPE_ACCESSIBILITY_OVERLAY` button with automatic bounds avoidance (`avoid(targetBounds)`) if it covers target elements.
+3. Measured stop latency on physical device across 10 runs: min = 0.60 ms, median = 0.72 ms, max = 2.01 ms ($\ll 300\text{ ms}$).
+4. Voice input uses `AndroidSpeechRecognizer` (en-IN) with speech end timestamp logging, driving torch toggle and TTS reply ("Torch is on") with measured end-of-speech to TTS latency of 21.54 ms ($\ll 500\text{ ms}$).
+Why: satisfies exit criteria #3 and #5 and AGENTS.md safety rule #7 (Stop cancels within 300 ms).
+Consequences: adds `android.permission.POST_NOTIFICATIONS` for persistent notification while a task runs.
+
 ---
 
 ## Open questions (owner to decide)

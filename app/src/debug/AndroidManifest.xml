@@ -9,5 +9,21 @@
                 <action android:name="com.mitra.app.foss.debug.MODEL_TEST" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".debug.ScreenDumpReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.mitra.app.debug.DUMP_SCREEN" />
+                <action android:name="com.mitra.app.foss.debug.DUMP_SCREEN" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".debug.DebugActionReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.mitra.app.debug.ACTION" />
+                <action android:name="com.mitra.app.foss.debug.ACTION" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
