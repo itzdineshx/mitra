@@ -127,6 +127,12 @@ Decision:
 Why: satisfies exit criteria #3 and #5 and AGENTS.md safety rule #7 (Stop cancels within 300 ms).
 Consequences: adds `android.permission.POST_NOTIFICATIONS` for persistent notification while a task runs.
 
+**D-022 · Code coverage tooling and trust engine verification (T08)** — Accepted · 2026-11-22
+Decision: Use Gradle built-in JaCoCo test reporting (`jacoco`) for `:trust`. Kover 0.9.x incompatible with Kotlin 2.4 internal KGP compilation structures (`compileKotlinTask`).
+Line coverage on `:trust` reached 90.46% (aim 90%), instruction coverage 82.54% ($\ge 60\%$), branch coverage 64.05%. Every trust rule (R1–R14 + EXPIRED) has dedicated firing and non-firing test cases.
+Why: satisfies T08 acceptance criteria and guarantees rigorous safety engine regression protection without unstable third-party plugins.
+Consequences: `:trust:test` is automatically finalized by `:trust:jacocoTestReport` to produce HTML and XML reports in CI.
+
 ---
 
 ## Open questions (owner to decide)

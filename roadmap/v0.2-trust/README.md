@@ -2,7 +2,7 @@
 
 **Phase 1 · App MVP** · Release channel: Internal · Sprint day 2
 
-**Status:** 🟡 In progress (6/19 steps)
+**Status:** 🟡 In progress (8/19 steps)
 
 ## Goal
 
@@ -24,7 +24,7 @@ Every action passes the deterministic trust engine. Risky steps ask the user; se
 
 > Tick a step `[x]` when it is merged and tested. Tick the task only when its **Accept** line is proven (test or recorded manual check).
 
-### [ ] T08 · Trust engine core (P0 · 🏃 sprint)
+### [x] T08 · Trust engine core (P0 · 🏃 sprint)
 
 - **Depends on:** T02
 - **Where:** `modules/trust/`
@@ -35,8 +35,8 @@ Every action passes the deterministic trust engine. Risky steps ask the user; se
 - [x] Risk re-derivation + `risk_keywords_en.json`, `denylist_packages.json`
 - [x] Rules R1–R14 + scope expiry
 - [x] Tests for every §6 case
-- [ ] A non-firing test for every rule
-- [ ] Coverage report (add Kover; record it in DECISIONS.md) ≥ 60%, aim 90%
+- [x] A non-firing test for every rule
+- [x] Coverage report (add Kover; record it in DECISIONS.md) ≥ 60%, aim 90%
 
 ### [ ] T60 · Database, settings and model storage (P0)
 
