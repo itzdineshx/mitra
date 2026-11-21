@@ -3,7 +3,7 @@
 [versions]
 agp = "9.4.1"                # AGP 9.x has built-in Kotlin: no kotlin-android plugin needed in Android modules
 kotlin = "2.4.20"
-coroutines = "1.10.2"
+coroutines = "1.11.0"
 serialization = "1.9.0"
 coreKtx = "1.16.0"
 activityCompose = "1.10.1"
