@@ -3,14 +3,22 @@ package com.mitra.app.debug
 import android.app.ActivityManager
 import android.content.Context
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -18,11 +26,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.mitra.agents.ModelStep
 import com.mitra.agents.Prompts
+import com.mitra.engine.Provenance
+import com.mitra.engine.access.AccessibilityEngine
 import com.mitra.model.DeviceTierDetector
 import com.mitra.model.FakeModel
 import com.mitra.model.LiteRtLocalModel
@@ -45,7 +60,9 @@ fun DebugSection(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var isRunning by remember { mutableStateOf(false) }
+    var isReadingScreen by remember { mutableStateOf(false) }
     var lastResult by remember { mutableStateOf<String?>(null) }
+    var testPassword by remember { mutableStateOf("SecretPassword123") }
 
     val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     val memInfo = ActivityManager.MemoryInfo()
@@ -66,20 +83,47 @@ fun DebugSection(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodySmall,
             )
 
-            Button(
-                onClick = {
-                    if (isRunning) return@Button
-                    isRunning = true
-                    scope.launch {
-                        val resultText = runModelBenchmark(context)
-                        lastResult = resultText
-                        isRunning = false
-                    }
-                },
-                enabled = !isRunning,
-            ) {
-                Text(if (isRunning) "Running model test…" else "Model test")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = {
+                        if (isRunning) return@Button
+                        isRunning = true
+                        scope.launch {
+                            val resultText = runModelBenchmark(context)
+                            lastResult = resultText
+                            isRunning = false
+                        }
+                    },
+                    enabled = !isRunning,
+                ) {
+                    Text(if (isRunning) "Running…" else "Model test")
+                }
+
+                Button(
+                    onClick = {
+                        if (isReadingScreen) return@Button
+                        isReadingScreen = true
+                        scope.launch {
+                            val engine = AccessibilityEngine(context)
+                            val snapshot = engine.readScreen()
+                            ScreenDebugState.lastSnapshot = snapshot
+                            isReadingScreen = false
+                        }
+                    },
+                    enabled = !isReadingScreen,
+                ) {
+                    Text(if (isReadingScreen) "Reading…" else "Inspect Screen")
+                }
             }
+
+            OutlinedTextField(
+                value = testPassword,
+                onValueChange = { testPassword = it },
+                label = { Text("Debug Password Field (T03 check)") },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier.fillMaxWidth(),
+            )
 
             lastResult?.let {
                 Text(
@@ -87,7 +131,102 @@ fun DebugSection(modifier: Modifier = Modifier) {
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
+
+            ScreenDebugState.lastSnapshot?.let { snapshot ->
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Screen Snapshot (${snapshot.elements.size} elements):",
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                Text(
+                    "Foreground: ${snapshot.foregroundPackage.ifEmpty { "unknown" }}",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                if (snapshot.currentUrl != null) {
+                    Text(
+                        "URL: ${snapshot.currentUrl}",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    snapshot.elements.take(15).forEach { elem ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        ) {
+                            Column(Modifier.padding(8.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
+                                    Text(
+                                        "[${elem.id}] ${elem.role}",
+                                        style = MaterialTheme.typography.labelMedium,
+                                    )
+                                    ProvenanceBadge(elem.provenance)
+                                    if (elem.secure) {
+                                        Box(
+                                            modifier =
+                                                Modifier
+                                                    .background(Color.Red.copy(alpha = 0.2f), RoundedCornerShape(4.dp))
+                                                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                                        ) {
+                                            Text("SECURE", color = Color.Red, fontSize = 10.sp)
+                                        }
+                                    }
+                                }
+                                val textDisplay = if (elem.secure) "[REDACTED/PASSWORD]" else (elem.text ?: elem.contentDescription ?: "")
+                                if (textDisplay.isNotBlank()) {
+                                    Text(
+                                        textDisplay,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        maxLines = 1,
+                                    )
+                                }
+                                Text(
+                                    "bounds=(${elem.bounds.left},${elem.bounds.top},${elem.bounds.right},${elem.bounds.bottom}) clickable=${elem.clickable}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                    if (snapshot.elements.size > 15) {
+                        Text(
+                            "+ ${snapshot.elements.size - 15} more elements",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun ProvenanceBadge(provenance: Provenance) {
+    val (bgColor, textColor) =
+        when (provenance) {
+            Provenance.SYSTEM_UI -> Color(0xFF1976D2).copy(alpha = 0.2f) to Color(0xFF1976D2)
+            Provenance.APP_LAYOUT -> Color(0xFF388E3C).copy(alpha = 0.2f) to Color(0xFF388E3C)
+            Provenance.WEB_CONTENT -> Color(0xFFF57C00).copy(alpha = 0.2f) to Color(0xFFF57C00)
+            Provenance.USER_CONTENT -> Color(0xFF7B1FA2).copy(alpha = 0.2f) to Color(0xFF7B1FA2)
+            Provenance.OVERLAY -> Color(0xFFD32F2F).copy(alpha = 0.2f) to Color(0xFFD32F2F)
+            Provenance.UNKNOWN -> Color.Gray.copy(alpha = 0.2f) to Color.DarkGray
+        }
+
+    Box(
+        modifier =
+            Modifier
+                .background(bgColor, RoundedCornerShape(4.dp))
+                .padding(horizontal = 4.dp, vertical = 2.dp),
+    ) {
+        Text(provenance.name, color = textColor, fontSize = 10.sp)
     }
 }
 

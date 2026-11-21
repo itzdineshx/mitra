@@ -29,6 +29,7 @@ class AccessibilityEngine(
 
     @Volatile private var stopped = false
     private var lastNodes: Map<String, AccessibilityNodeInfo> = emptyMap()
+    private var lastElements: Map<String, ScreenElement> = emptyMap()
 
     private val service get() = MitraAccessibilityService.instance
 
@@ -36,6 +37,7 @@ class AccessibilityEngine(
 
     override suspend fun readScreen(): ScreenSnapshot {
         val s = service ?: return ScreenSnapshot(foregroundPackage = "")
+        s.awaitStableScreen()
         val fg =
             s.rootInActiveWindow
                 ?.packageName
@@ -44,7 +46,12 @@ class AccessibilityEngine(
         val mapper = NodeMapper(targetPackage = fg)
         val elements = mutableListOf<ScreenElement>()
         s.windows.forEach { mapper.map(it, elements) }
+
+        // Release previous snapshot nodes to avoid memory leaks (T03)
+        lastNodes.values.forEach { runCatching { it.recycle() } }
         lastNodes = mapper.byId
+        lastElements = elements.associateBy { it.id }
+
         return ScreenSnapshot(
             foregroundPackage = fg,
             currentUrl = AddressBar.read(elements, fg),
@@ -57,6 +64,7 @@ class AccessibilityEngine(
         val intent =
             context.packageManager.getLaunchIntentForPackage(packageName) ?: return fail(FailureReason.TARGET_NOT_FOUND, packageName)
         context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        service?.awaitStableScreen()
         return ActionResult.Ok()
     }
 
@@ -65,49 +73,94 @@ class AccessibilityEngine(
         intent.data?.let { i.data = Uri.parse(it) }
         intent.packageName?.let { i.setPackage(it) }
         intent.extras.forEach { (k, v) -> i.putExtra(k, v) }
-        return runCatching {
-            context.startActivity(
-                i,
-            )
-        }.fold({ ActionResult.Ok() }, { fail(FailureReason.NOT_SUPPORTED, it.message.orEmpty()) })
+        val result =
+            runCatching {
+                context.startActivity(i)
+            }.fold({ ActionResult.Ok() }, { fail(FailureReason.NOT_SUPPORTED, it.message.orEmpty()) })
+        service?.awaitStableScreen()
+        return result
     }
 
-    override suspend fun tap(elementId: String) = nodeAction(elementId, AccessibilityNodeInfo.ACTION_CLICK)
+    override suspend fun tap(elementId: String): ActionResult {
+        if (stopped) return fail(FailureReason.CANCELLED, "stopped")
+        if (lastElements.isEmpty()) readScreen()
 
-    override suspend fun longPress(elementId: String) = nodeAction(elementId, AccessibilityNodeInfo.ACTION_LONG_CLICK)
+        val nodeRes = nodeAction(elementId, AccessibilityNodeInfo.ACTION_CLICK)
+        if (nodeRes is ActionResult.Ok) {
+            service?.awaitStableScreen()
+            return nodeRes
+        }
+
+        // Tap falls back to a gesture at the element centre (T04)
+        val elem = lastElements[elementId] ?: return nodeRes
+        val gestureRes = swipe(Point(elem.bounds.centerX, elem.bounds.centerY), Point(elem.bounds.centerX, elem.bounds.centerY), 50L)
+        service?.awaitStableScreen()
+        return gestureRes
+    }
+
+    override suspend fun longPress(elementId: String): ActionResult {
+        if (stopped) return fail(FailureReason.CANCELLED, "stopped")
+        if (lastElements.isEmpty()) readScreen()
+
+        val res = nodeAction(elementId, AccessibilityNodeInfo.ACTION_LONG_CLICK)
+        service?.awaitStableScreen()
+        return res
+    }
 
     override suspend fun type(
         elementId: String,
         text: String,
     ): ActionResult {
+        if (stopped) return fail(FailureReason.CANCELLED, "stopped")
+        if (lastElements.isEmpty()) readScreen()
+
+        val elem = lastElements[elementId]
+        if (elem?.secure == true) return fail(FailureReason.SECURE_FIELD, "never types into secure fields")
         val node = lastNodes[elementId] ?: return fail(FailureReason.TARGET_NOT_FOUND, elementId)
         if (node.isPassword) return fail(FailureReason.SECURE_FIELD, "never types into secure fields")
+
         val args = Bundle().apply { putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text) }
-        return if (node.performAction(
-                AccessibilityNodeInfo.ACTION_SET_TEXT,
-                args,
-            )
-        ) {
-            ActionResult.Ok()
-        } else {
-            fail(FailureReason.UNKNOWN, "set text failed")
-        }
+        val res =
+            if (node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)) {
+                ActionResult.Ok()
+            } else {
+                fail(FailureReason.UNKNOWN, "set text failed")
+            }
+        service?.awaitStableScreen()
+        return res
     }
 
     override suspend fun scroll(
         direction: Direction,
         elementId: String?,
     ): ActionResult {
+        if (stopped) return fail(FailureReason.CANCELLED, "stopped")
+        if (lastElements.isEmpty()) readScreen()
+
         val node = elementId?.let { lastNodes[it] } ?: lastNodes.values.firstOrNull { it.isScrollable }
         val action =
-            if (direction == Direction.UP ||
-                direction == Direction.LEFT
-            ) {
+            if (direction == Direction.UP || direction == Direction.LEFT) {
                 AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
             } else {
                 AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
             }
-        return if (node?.performAction(action) == true) ActionResult.Ok() else fail(FailureReason.TARGET_NOT_FOUND, "nothing to scroll")
+        if (node?.performAction(action) == true) {
+            service?.awaitStableScreen()
+            return ActionResult.Ok()
+        }
+
+        // Fall back to gesture swipe if node scroll is unavailable (e.g. Compose verticalScroll)
+        val dm = context.resources.displayMetrics
+        val w = dm.widthPixels
+        val h = dm.heightPixels
+        val (from, to) =
+            when (direction) {
+                Direction.DOWN -> Point(w / 2, (h * 0.75).toInt()) to Point(w / 2, (h * 0.25).toInt())
+                Direction.UP -> Point(w / 2, (h * 0.25).toInt()) to Point(w / 2, (h * 0.75).toInt())
+                Direction.RIGHT -> Point((w * 0.75).toInt(), h / 2) to Point((w * 0.25).toInt(), h / 2)
+                Direction.LEFT -> Point((w * 0.25).toInt(), h / 2) to Point((w * 0.75).toInt(), h / 2)
+            }
+        return swipe(from, to, 300L)
     }
 
     override suspend fun swipe(
@@ -134,6 +187,7 @@ class AccessibilityEngine(
                     null,
                 )
             }
+        s.awaitStableScreen()
         return if (ok) ActionResult.Ok() else fail(FailureReason.CANCELLED, "gesture cancelled")
     }
 
@@ -147,12 +201,16 @@ class AccessibilityEngine(
                 GlobalAction.NOTIFICATIONS -> AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS
                 GlobalAction.QUICK_SETTINGS -> AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS
             }
-        return if (s.performGlobalAction(code)) ActionResult.Ok() else fail(FailureReason.UNKNOWN, "global action failed")
+        val res = if (s.performGlobalAction(code)) ActionResult.Ok() else fail(FailureReason.UNKNOWN, "global action failed")
+        s.awaitStableScreen()
+        return res
     }
 
     override fun stop() {
         stopped = true
+        lastNodes.values.forEach { runCatching { it.recycle() } }
         lastNodes = emptyMap()
+        lastElements = emptyMap()
     }
 
     private fun nodeAction(
