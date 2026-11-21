@@ -1,0 +1,42 @@
+# Gradle / Android Studio
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+.kotlin/
+
+# Signing: NEVER commit keys
+*.jks
+*.keystore
+keystore.properties
+keys/
+*.pem
+
+# Firebase config (direct flavour) stays local
+google-services.json
+
+# Models and large ML files
+*.litertlm
+*.tflite
+*.task
+*.safetensors
+*.gguf
+ml/data/
+ml/checkpoints/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Eval output (keep the folder)
+eval/results/*
+!eval/results/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db

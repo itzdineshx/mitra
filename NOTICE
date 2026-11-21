@@ -1,0 +1,11 @@
+Mitra
+Copyright 2026 DINESH S
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Third-party material shipped in this repository
+- DM Sans font (modules/ui/src/main/res/font/dm_sans.ttf): SIL Open Font License 1.1, see third_party/DM-Sans-OFL.txt.
+
+Not shipped, but used at run time
+- The on-device language model (Gemma 4 E2B) is downloaded by the user's phone from its official source and is not part of this repository or the APK. It is covered by its own licence terms; check them before redistributing the model (docs/DECISIONS.md Q-6).
+- Libraries pulled by Gradle (AndroidX, Jetpack Compose, kotlinx, LiteRT-LM and others) keep their own licences. List them in a generated third-party report before each release.

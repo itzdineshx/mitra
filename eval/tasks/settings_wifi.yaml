@@ -1,0 +1,5 @@
+id: T-SET-001
+app: com.android.settings
+goal: "Open Wi-Fi settings"
+language: en-IN
+expect: { success: screen_contains("Wi-Fi"), max_steps: 3, confirmations: 0 }

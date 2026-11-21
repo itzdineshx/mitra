@@ -1,0 +1,13 @@
+<resources>
+    <!-- English first. Hindi (values-hi) and Tamil (values-ta) come in v1.0: never hard-code user-facing text. -->
+    <string name="app_name">Mitra</string>
+    <string name="home_greeting">Hi! What should I do on your phone?</string>
+    <string name="home_hint">Type a task, e.g. \"Turn on Wi-Fi\"</string>
+    <string name="home_go">Go</string>
+    <string name="home_mic">Speak</string>
+    <string name="service_off_title">Mitra needs Accessibility access</string>
+    <string name="service_off_body">This lets Mitra tap and type for you. Risky steps always ask you first, and passwords, OTPs and payments are never touched.</string>
+    <string name="service_off_button">Open settings</string>
+    <string name="restricted_hint">On Android 13+, if the switch is greyed out: App info → ⋮ → Allow restricted settings.</string>
+    <string name="service_on">Ready. Accessibility is on.</string>
+</resources>

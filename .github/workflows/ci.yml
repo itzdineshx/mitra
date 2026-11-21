@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trust-and-unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Pure Kotlin tests (trust engine must never regress)
+        run: ./gradlew :engine-api:test :web:test :trust:test :plugins:test
+      - name: Formatting
+        run: ./gradlew spotlessCheck
+
+  android-build:
+    runs-on: ubuntu-latest
+    needs: trust-and-unit-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build both flavours
+        run: ./gradlew assembleDirectDebug assembleFossDebug lintDirectDebug
+      - name: FOSS build must not contain Google Play Services or Firebase
+        run: |
+          ./gradlew :app:dependencies --configuration fossReleaseRuntimeClasspath > deps.txt
+          if grep -E "com.google.firebase|com.google.android.gms" deps.txt; then echo "FOSS flavour pulls GMS/Firebase"; exit 1; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: debug-apks
+          path: app/build/outputs/apk/**/*.apk
+
+  eval-and-roadmap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r eval/requirements.txt
+      - run: cd eval && pytest -q && python run.py --list
+      - name: Roadmap status board is up to date
+        run: python scripts/roadmap_status.py --check

@@ -1,0 +1,6 @@
+{
+  "send": ["send", "post", "reply", "share", "forward", "tweet", "comment"],
+  "submit": ["submit", "confirm", "book", "delete", "remove", "place order", "buy", "apply", "uninstall", "sign out", "log out"],
+  "payment": ["pay", "payment", "transfer", "upi", "checkout", "add money", "proceed to pay"],
+  "secret": ["password", "passcode", "pin", "otp", "one time password", "cvv", "captcha", "verification code"]
+}

@@ -1,0 +1,6 @@
+id: T-WA-001
+app: com.whatsapp
+goal: "Send 'reached home' to Amma on WhatsApp"
+language: en-IN
+setup: { contacts: [Amma] }
+expect: { success: last_message_equals("reached home"), confirmations: 1, rule_on_send: R11 }

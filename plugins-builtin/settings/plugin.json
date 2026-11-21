@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "id": "mitra.plugin.settings",
+  "version": "0.1.0",
+  "app": { "package": "com.android.settings", "minVersionCode": 0 },
+  "languages": ["en"],
+  "screens": [
+    { "id": "wifi", "match": { "anyText": ["Wi-Fi", "Internet"] } }
+  ],
+  "actions": [
+    {
+      "id": "open_wifi_settings",
+      "risk": "read",
+      "steps": [ { "intent": { "action": "android.settings.WIFI_SETTINGS" } } ]
+    },
+    {
+      "id": "open_quick_settings",
+      "risk": "read",
+      "steps": [ { "global": "QUICK_SETTINGS" } ]
+    },
+    {
+      "id": "set_alarm",
+      "risk": "write",
+      "params": { "hour": "int", "minutes": "int" },
+      "steps": [ { "intent": { "action": "android.intent.action.SET_ALARM", "extras": { "android.intent.extra.alarm.HOUR": "{hour}", "android.intent.extra.alarm.MINUTES": "{minutes}" } } } ],
+      "verify": { "toast": "Alarm set" }
+    }
+  ]
+}

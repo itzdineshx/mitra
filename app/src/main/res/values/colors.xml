@@ -1,0 +1,7 @@
+<resources>
+    <!-- Brand: see brand/README.txt and docs/UI_SPEC.md §2 -->
+    <color name="mitra_blue">#2F5BFF</color>
+    <color name="mitra_violet">#7C5CFF</color>
+    <color name="mitra_cyan">#22D3EE</color>
+    <color name="mitra_night">#101828</color>
+</resources>

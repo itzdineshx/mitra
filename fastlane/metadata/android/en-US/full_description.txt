@@ -1,0 +1,18 @@
+Mitra is an open-source voice assistant that operates your phone for you: apps, settings and websites in your own browser.
+
+Say it, watch it, stay in control. Your words appear as you speak, an AI model that runs on your phone decides the steps, and Mitra taps and types in the real app while you watch. A Stop button is always on screen.
+
+Safety first
+- A fixed set of safety rules written as code (not an AI) checks every step.
+- Sending, submitting and deleting always ask you first.
+- Passwords, OTPs, CAPTCHAs and payments are handed to you. Mitra never types them.
+- Text on web pages, in messages and in mails is treated as data, never as instructions.
+
+Private by design
+- Speech, the AI and the screen reading stay on your phone.
+- No account, no ads, no analytics.
+- Your history is encrypted on the phone and you can delete it at any time.
+
+Needs the Accessibility permission so it can tap and type for you. On Android 13 and later you may first need to allow restricted settings for sideloaded apps; Mitra guides you.
+
+English (India) first. Hindi and Tamil are planned.

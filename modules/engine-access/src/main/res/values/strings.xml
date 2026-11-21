@@ -1,0 +1,5 @@
+<resources>
+    <string name="mitra_service_label">Mitra</string>
+    <string name="mitra_service_description">Mitra reads the screen and taps, types and scrolls only for the task you asked for. Risky steps always ask you first. Passwords, OTPs and payments are never touched. You can press Stop at any time.</string>
+    <string name="mitra_stop">Stop</string>
+</resources>
