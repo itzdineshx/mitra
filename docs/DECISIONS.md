@@ -133,6 +133,16 @@ Line coverage on `:trust` reached 90.46% (aim 90%), instruction coverage 82.54% 
 Why: satisfies T08 acceptance criteria and guarantees rigorous safety engine regression protection without unstable third-party plugins.
 Consequences: `:trust:test` is automatically finalized by `:trust:jacocoTestReport` to produce HTML and XML reports in CI.
 
+**D-023 · Room 2.8.5, SQLCipher encryption, and local data architecture (T60)** — Accepted · 2026-11-22
+Decision:
+1. Settle DECISIONS Q-3: SQLCipher (`net.zetetic:sqlcipher-android:4.5.4`) selected for transparent database encryption using `SupportOpenHelperFactory`. License is BSD 3-Clause, fully compatible with F-Droid (`foss` build).
+2. Android Keystore AES-256-GCM (`mitra_db_key`) wraps a 32-byte database passphrase saved to `noBackupFilesDir/db_passphrase.bin`.
+3. Key loss recovery automatically rotates `.bad` files, purges stale `.bad` files (> 7 days), and prompts notice in History.
+4. Room 2.8.5 with KSP 2.3.14 provides schema export to `modules/data/schemas/`.
+5. Redaction rules strictly enforce 40-character truncation + SHA-256, completely omitting text on secure fields.
+6. 90-day retention prune, 100 MB database cap, and `DataEraser` (Delete all) wipe database, keys, plugins, downloads, and preferences.
+Why: satisfies T60 acceptance criteria and guarantees strict zero-leakage local storage architecture per `docs/DATA_SPEC.md`.
+
 ---
 
 ## Open questions (owner to decide)

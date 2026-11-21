@@ -1,11 +1,18 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "com.mitra.data"
     compileSdk = 36
-    defaultConfig { minSdk = 29 }
+    defaultConfig {
+        minSdk = 29
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
+        }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -13,7 +20,29 @@ android {
 }
 
 dependencies {
-    // Room + encryption are added in task T09 (see docs/DECISIONS.md Q-3)
+    implementation(project(":engine-api"))
+    implementation(project(":trust"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.sqlcipher.android)
+    implementation(libs.androidx.sqlite)
+    implementation(libs.androidx.sqlite.framework)
+
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.room.testing)
+    testRuntimeOnly(libs.junit.launcher)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

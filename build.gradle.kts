@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.spotless)
+    alias(libs.plugins.ksp) apply false
 }
 
 // Formatting for every module: ./gradlew spotlessApply (check: spotlessCheck)

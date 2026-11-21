@@ -8,7 +8,7 @@ This folder is the single place where progress is tracked. The long-form plan (c
 | Version | Phase | Status | Steps done | Tasks |
 |---|---|---|---|---|
 | [v0.1 — Hello Mitra](v0.1-hello-mitra/README.md) | Phase 0–1 · Foundation | ✅ Done | 35/35 | T01, T02, T03, T04, T05, T06, T07 |
-| [v0.2 — Trust](v0.2-trust/README.md) | Phase 1 · App MVP | 🟡 In progress | 8/19 | T08, T60, T09 |
+| [v0.2 — Trust](v0.2-trust/README.md) | Phase 1 · App MVP | 🟡 In progress | 16/19 | T08, T60, T09 |
 | [v0.3 — Team](v0.3-team/README.md) | Phase 1 · App MVP | 🟡 In progress | 4/15 | T10, T11, T12 |
 | [v0.4 — Plugins](v0.4-plugins/README.md) | Phase 1 · App MVP | 🟡 In progress | 3/17 | T13, T14, T15, T16, T19 |
 | [v0.5 — Web](v0.5-web/README.md) | Phase 1 · App MVP | 🟡 In progress | 2/8 | T17, T18 |

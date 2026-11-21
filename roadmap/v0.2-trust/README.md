@@ -2,7 +2,7 @@
 
 **Phase 1 · App MVP** · Release channel: Internal · Sprint day 2
 
-**Status:** 🟡 In progress (8/19 steps)
+**Status:** 🟡 In progress (16/19 steps)
 
 ## Goal
 
@@ -38,21 +38,21 @@ Every action passes the deterministic trust engine. Risky steps ask the user; se
 - [x] A non-firing test for every rule
 - [x] Coverage report (add Kover; record it in DECISIONS.md) ≥ 60%, aim 90%
 
-### [ ] T60 · Database, settings and model storage (P0)
+### [x] T60 · Database, settings and model storage (P0)
 
 - **Depends on:** T01
 - **Where:** `modules/data/`
 - **Spec:** docs/DATA_SPEC.md
 - **Accept:** All DATA_SPEC §10 tests pass; after Delete all no database, plugin or settings file remains; no secure-field text reaches `steps` (test).
 
-- [ ] Decide Q-3 (SQLCipher vs alternative); record it in DECISIONS.md and check its licence for F-Droid
-- [ ] Room entities and DAOs for the tables in DATA_SPEC §3; schema export
-- [ ] Encrypted open with a Keystore-wrapped key; key-loss recovery (`.bad` file and notice)
-- [ ] `SettingsStore` (DataStore) with the keys in DATA_SPEC §2
-- [ ] Redaction rules: 40-character truncation + SHA-256, never secure text (DATA_SPEC §4)
-- [ ] 90-day and 100 MB prune; delete one task; `DataEraser` (Delete all)
-- [ ] `ModelFiles`: free-space check, resumable `.part` download, SHA-256 verify, atomic move
-- [ ] `allowBackup=false` + `dataExtractionRules`; migration test helper; the tests in DATA_SPEC §10
+- [x] Decide Q-3 (SQLCipher vs alternative); record it in DECISIONS.md and check its licence for F-Droid
+- [x] Room entities and DAOs for the tables in DATA_SPEC §3; schema export
+- [x] Encrypted open with a Keystore-wrapped key; key-loss recovery (`.bad` file and notice)
+- [x] `SettingsStore` (DataStore) with the keys in DATA_SPEC §2
+- [x] Redaction rules: 40-character truncation + SHA-256, never secure text (DATA_SPEC §4)
+- [x] 90-day and 100 MB prune; delete one task; `DataEraser` (Delete all)
+- [x] `ModelFiles`: free-space check, resumable `.part` download, SHA-256 verify, atomic move
+- [x] `allowBackup=false` + `dataExtractionRules`; migration test helper; the tests in DATA_SPEC §10
 
 ### [ ] T09 · TrustedExecutor + Confirmer + AuditLog (P0 · 🏃 sprint)
 
