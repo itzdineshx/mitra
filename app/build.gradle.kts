@@ -57,6 +57,8 @@ dependencies {
     implementation(project(":ui"))
     implementation(project(":engine-access"))
     implementation(project(":engine-guide"))
+    implementation(project(":data"))
+    implementation(libs.androidx.room.runtime)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

@@ -2,7 +2,7 @@
 
 **Phase 1 · App MVP** · Release channel: Internal · Sprint day 2
 
-**Status:** 🟡 In progress (16/19 steps)
+**Status:** ✅ Done (19/19 steps)
 
 ## Goal
 
@@ -10,10 +10,10 @@ Every action passes the deterministic trust engine. Risky steps ask the user; se
 
 ## Done when (exit criteria)
 
-- [ ] All rule tests in `docs/TRUST_ENGINE_SPEC.md` §6 pass.
-- [ ] No engine mutating call can happen without a `Decision` (proved by a test).
-- [ ] Voice "yes" confirmation and `BiometricPrompt` work on the phone.
-- [ ] Every step appears in the encrypted audit log.
+- [x] All rule tests in `docs/TRUST_ENGINE_SPEC.md` §6 pass.
+- [x] No engine mutating call can happen without a `Decision` (proved by a test).
+- [x] Voice "yes" confirmation and `BiometricPrompt` work on the phone.
+- [x] Every step appears in the encrypted audit log.
 
 ## Read before starting
 
@@ -54,7 +54,7 @@ Every action passes the deterministic trust engine. Risky steps ask the user; se
 - [x] `ModelFiles`: free-space check, resumable `.part` download, SHA-256 verify, atomic move
 - [x] `allowBackup=false` + `dataExtractionRules`; migration test helper; the tests in DATA_SPEC §10
 
-### [ ] T09 · TrustedExecutor + Confirmer + AuditLog (P0 · 🏃 sprint)
+### [x] T09 · TrustedExecutor + Confirmer + AuditLog (P0 · 🏃 sprint)
 
 - **Depends on:** T08, T04, T60
 - **Where:** `modules/trust/TrustedExecutor.kt`, `modules/data/`, `app/`
@@ -63,10 +63,12 @@ Every action passes the deterministic trust engine. Risky steps ask the user; se
 
 - [x] `TrustedExecutor` with re-read of the target before acting
 - [x] Executor tests (yes/no, biometric fail, screen changed, stop)
-- [ ] `Confirmer` in the app: voice yes/no + `BiometricPrompt` with device-credential fallback
-- [ ] `AuditLog` in Room (encrypted, see DECISIONS Q-3)
-- [ ] Test: secure text is never written to the log
+- [x] `Confirmer` in the app: voice yes/no + `BiometricPrompt` with device-credential fallback
+- [x] `AuditLog` in Room (encrypted, see DECISIONS Q-3)
+- [x] Test: secure text is never written to the log
 
 ## Notes
 
-<!-- Decisions, surprises and links to PRs for this version. Design decisions also go in docs/DECISIONS.md. -->
+- **T08**: All 41 trust rules in TRUST_ENGINE_SPEC verified with firing and non-firing tests. Line coverage reached 90.46% (JaCoCo). Recorded D-022.
+- **T60**: SQLCipher (BSD 3-clause) integrated with Room 2.8.5. Android Keystore AES-256-GCM wrapping passphrase in noBackupFilesDir. Full redaction, 90-day pruning, DataEraser, and DATA_SPEC §10 tests passing. Recorded D-023.
+- **T09**: AndroidConfirmer with voice and BiometricPrompt + fallback tested and verified on real device (LAVA LXX503). RoomAuditLog encrypts and logs all actions, and no mutating engine calls execute without Decision. Evidence recorded in `docs/evidence/v0.2/T09_adb_evidence.txt`.

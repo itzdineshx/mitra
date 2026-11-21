@@ -18,6 +18,13 @@ import javax.crypto.spec.GCMParameterSpec
  * Android Keystore wrapper for database encryption key and key-loss recovery (docs/DATA_SPEC.md §5).
  */
 object DatabaseKeyManager {
+    init {
+        try {
+            System.loadLibrary("sqlcipher")
+        } catch (_: Throwable) {
+        }
+    }
+
     private const val KEYSTORE_PROVIDER = "AndroidKeyStore"
     private const val KEY_ALIAS = "mitra_db_key"
     private const val GCM_IV_LENGTH = 12

@@ -36,6 +36,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mitra.agents.ModelStep
 import com.mitra.agents.Prompts
+import com.mitra.app.AndroidConfirmer
+import com.mitra.app.MainActivity
+import com.mitra.data.audit.RoomAuditLog
+import com.mitra.data.crypto.DatabaseKeyManager
+import com.mitra.data.db.TaskEntity
 import com.mitra.engine.Provenance
 import com.mitra.engine.access.AccessibilityEngine
 import com.mitra.model.DeviceTierDetector
@@ -44,7 +49,16 @@ import com.mitra.model.LiteRtLocalModel
 import com.mitra.model.LocalModel
 import com.mitra.model.ModelFiles
 import com.mitra.model.ModelRunRecord
+import com.mitra.trust.ActionType
 import com.mitra.trust.AgentRole
+import com.mitra.trust.DeviceContext
+import com.mitra.trust.ProposedAction
+import com.mitra.trust.Risk
+import com.mitra.trust.TaintedText
+import com.mitra.trust.TaskScope
+import com.mitra.trust.TrustEngine
+import com.mitra.trust.TrustedExecutor
+import com.mitra.voice.AndroidTts
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -129,6 +143,103 @@ fun DebugSection(modifier: Modifier = Modifier) {
                 Text(
                     text = it,
                     style = MaterialTheme.typography.bodySmall,
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+            Text("Trust Engine & Audit Log (v0.2)", style = MaterialTheme.typography.titleMedium)
+            var trustStatus by remember { mutableStateOf<String?>(null) }
+            var isRunningTrust by remember { mutableStateOf(false) }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = {
+                        if (isRunningTrust) return@Button
+                        isRunningTrust = true
+                        scope.launch(Dispatchers.IO) {
+                            try {
+                                val db = DatabaseKeyManager.buildEncryptedDatabase(context)
+                                val taskId = "task_${System.currentTimeMillis()}"
+                                db.taskDao().insert(
+                                    TaskEntity(
+                                        id = taskId,
+                                        createdAt = System.currentTimeMillis(),
+                                        userText = "Send greeting on WhatsApp",
+                                        source = "ORB",
+                                        status = "DONE",
+                                        summary = "TrustedExecutor test",
+                                        scopeJson = "{}",
+                                        engine = "ACCESSIBILITY",
+                                    ),
+                                )
+                                val auditLog = RoomAuditLog(db)
+                                val tts = AndroidTts(context)
+                                val confirmer =
+                                    AndroidConfirmer(
+                                        context = context,
+                                        activityProvider = { MainActivity.currentActivity },
+                                        tts = tts,
+                                    )
+                                val trustEngine = TrustEngine()
+                                val engine = AccessibilityEngine(context)
+                                val executor =
+                                    TrustedExecutor(
+                                        engine = engine,
+                                        trust = trustEngine,
+                                        confirmer = confirmer,
+                                        audit = auditLog,
+                                    ) {
+                                        DeviceContext(
+                                            foregroundPackage = "com.whatsapp",
+                                            screen = engine.readScreen(),
+                                            standingRuleCoversAction = true,
+                                        )
+                                    }
+                                val taskScope =
+                                    TaskScope(
+                                        taskId = taskId,
+                                        goal = "Send greeting on WhatsApp",
+                                        allowedPackages = setOf("com.whatsapp"),
+                                        allowedActions = setOf(ActionType.TAP, ActionType.SPEAK),
+                                        maxRisk = Risk.SEND,
+                                        expiresAtMillis = System.currentTimeMillis() + 600_000,
+                                    )
+                                val action =
+                                    ProposedAction(
+                                        taskId = taskId,
+                                        step = 1,
+                                        agent = AgentRole.APP,
+                                        type = ActionType.SPEAK,
+                                        text = TaintedText.fromUser("Trust verified"),
+                                        risk = Risk.READ,
+                                    )
+                                val res = executor.execute(action, taskScope)
+                                val steps = db.stepDao().getStepsForTaskSync(taskId)
+                                val step = steps.firstOrNull()
+                                withContext(Dispatchers.Main) {
+                                    trustStatus =
+                                        "Executed: $res\nAudit stepId: ${step?.stepId}\nVerdict: ${step?.verdict}\nRule: ${step?.ruleId ?: "none"}\nAction: ${step?.actionJson}"
+                                    isRunningTrust = false
+                                }
+                            } catch (e: Exception) {
+                                withContext(Dispatchers.Main) {
+                                    trustStatus = "Error: ${e.message}"
+                                    isRunningTrust = false
+                                }
+                            }
+                        }
+                    },
+                    enabled = !isRunningTrust,
+                ) {
+                    Text(if (isRunningTrust) "Verifying…" else "Test Trust & Audit")
+                }
+            }
+
+            trustStatus?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
                 )
             }
 
@@ -238,7 +349,7 @@ suspend fun runModelBenchmark(context: Context): String =
             if (isRealModel) {
                 if (ModelDebugState.activeModel !is LiteRtLocalModel || !ModelDebugState.activeModel!!.isLoaded) {
                     val realModel = LiteRtLocalModel()
-                    realModel.load(modelFile!!.absolutePath)
+                    realModel.load(modelFile.absolutePath)
                     ModelDebugState.activeModel = realModel
                 }
                 ModelDebugState.activeModel!!
@@ -308,7 +419,7 @@ suspend fun runModelBenchmark(context: Context): String =
         )
 
         buildString {
-            appendLine("Backend: ${if (isRealModel) "LiteRT-LM (${modelFile?.name})" else "FakeModel (no model file on phone)"}")
+            appendLine("Backend: ${if (isRealModel) "LiteRT-LM (${modelFile.name})" else "FakeModel (no model file on phone)"}")
             appendLine("JSON Valid: $isValidJson (Action: ${actionType ?: "none"})")
             appendLine("Time to first token: $firstTokenMs ms")
             appendLine("Tokens/s: ${"%.1f".format(tps)} ($tokenCount tokens)")

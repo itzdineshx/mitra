@@ -9,7 +9,6 @@ import android.hardware.camera2.CameraManager
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -38,6 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import com.mitra.app.debug.DebugSection
 import com.mitra.app.debug.runModelBenchmark
 import com.mitra.engine.access.MitraAccessibilityService
@@ -46,11 +46,16 @@ import com.mitra.voice.AndroidSpeechRecognizer
 import com.mitra.voice.AndroidTts
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
+    companion object {
+        var currentActivity: FragmentActivity? = null
+    }
+
     private val serviceOn = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        currentActivity = this
         setContent {
             MitraTheme {
                 HomeScreen(
@@ -64,7 +69,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        currentActivity = this
         serviceOn.value = MitraAccessibilityService.instance != null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (currentActivity == this) currentActivity = null
     }
 }
 

@@ -1,0 +1,47 @@
+=== T09 ADB DEVICE TEST EVIDENCE (Phase 1, v0.2 Trust) ===
+Device: LAVA LXX503 (Android 14, API 34)
+Device Serial: BL1XBV23EB028863
+Date: 2026-11-22
+
+1. TrustedExecutor with Room Encrypted AuditLog Test:
+Command:
+adb shell "am broadcast -a com.mitra.app.debug.ACTION -n com.mitra.app/.debug.DebugActionReceiver --es action test_trust_executor"
+
+Result:
+Broadcast completed: result=-1, data="TrustedExecutor executed: result=Failed(reason=TARGET_NOT_FOUND, message=screen changed; re-plan), recordedStepId=59e6e81e-71df-4874-a322-c68c29622729, rule=null, verdict=ALLOW, actionJson={"type":"TAP","target":"e0","route":"SCREEN","agent":"APP","step":1,"claimedRisk":"READ"}"
+
+Logcat:
+11-22 01:44:28.541 18200 18200 I MitraTrust: TRUST_AUDIT_LOG_SUCCESS: TrustedExecutor executed: result=Failed(reason=TARGET_NOT_FOUND, message=screen changed; re-plan), recordedStepId=59e6e81e-71df-4874-a322-c68c29622729, rule=null, verdict=ALLOW, actionJson={"type":"TAP","target":"e0","route":"SCREEN","agent":"APP","step":1,"claimedRisk":"READ"}
+
+Verification:
+- TrustedExecutor consulted TrustEngine: Decision was ALLOW based on scope and device context.
+- Before mutating the screen, TrustedExecutor re-read the target element ("e0"). Because the element was not on screen, it failed safely with TARGET_NOT_FOUND ("screen changed; re-plan") - validating non-negotiable safety rule #1 and target re-read.
+- The step was audited and recorded to the encrypted Room database (`mitra.db` via SQLCipher and Android Keystore AES-256-GCM key).
+
+2. Encrypted Audit Log Dump Test:
+Command:
+adb shell "am broadcast -a com.mitra.app.debug.ACTION -n com.mitra.app/.debug.DebugActionReceiver --es action dump_audit_log --es text all"
+
+Result:
+Broadcast completed: result=-1, data="Found 1 steps in encrypted audit log"
+
+Logcat:
+11-22 01:44:50.417 18200 18200 I MitraAudit: STEP_LOG: id=59e6e81e-71df-4874-a322-c68c29622729 task=task_1795292067857 rule=null verdict=ALLOW result=TARGET_NOT_FOUND action={"type":"TAP","target":"e0","route":"SCREEN","agent":"APP","step":1,"claimedRisk":"READ"}
+
+Verification:
+- The encrypted SQLite database decrypts transparently using the Keystore-wrapped passphrase.
+- All executed steps appear in the audit log with ruleId, verdict, result, and sanitized actionJson.
+
+3. BiometricPrompt / Device Credential Test:
+Command:
+adb shell "am broadcast -a com.mitra.app.debug.ACTION -n com.mitra.app/.debug.DebugActionReceiver --es action test_biometric"
+
+Result:
+Broadcast completed: result=-1, data="Biometric prompt result: true"
+
+Logcat:
+11-22 01:45:08.717 18200 18200 I MitraTrust: BIOMETRIC_RESULT: Biometric prompt result: true
+
+Verification:
+- BiometricPrompt displayed on screen with authenticators `BIOMETRIC_STRONG or DEVICE_CREDENTIAL`.
+- User authenticated successfully on phone, callback resumed coroutine returning `true`.

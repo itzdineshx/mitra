@@ -59,6 +59,9 @@ interface StepDao {
     @Query("SELECT * FROM steps WHERE task_id = :taskId ORDER BY idx ASC")
     suspend fun getStepsForTaskSync(taskId: String): List<StepEntity>
 
+    @Query("SELECT * FROM steps ORDER BY created_at DESC LIMIT 50")
+    suspend fun getRecentStepsSync(): List<StepEntity>
+
     @Query("DELETE FROM steps")
     suspend fun deleteAll(): Int
 }

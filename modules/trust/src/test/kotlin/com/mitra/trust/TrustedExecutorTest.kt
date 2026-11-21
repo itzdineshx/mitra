@@ -155,4 +155,46 @@ class TrustedExecutorTest {
             exec.execute(tap("send"), scope())
             assertTrue(engine.stopped)
         }
+
+    @Test
+    fun `no engine mutating call can happen without a Decision`() =
+        runTest {
+            // Test multiple refused/aborted conditions: engine taps/types must remain empty
+            val c = ctx(el("x", "Display", pkg = "com.android.settings"), pkg = "com.android.settings")
+            val engine = FakeEngine(c.screen)
+            val audit = MemoryAudit()
+            val exec = TrustedExecutor(engine, TrustEngine(), FakeConfirmer(sayYes = true), audit) { c }
+
+            // 1. Refused by R2 (package outside scope)
+            val res = exec.execute(tap("x"), scope())
+            assertTrue(res is ActionResult.Failed)
+            assertTrue(engine.taps.isEmpty(), "Engine must not perform any mutating action when refused")
+            assertEquals("R2", audit.decisions.single().rule)
+
+            // 2. Refused by R3 (action outside scope)
+            val sRead = scope(packages = setOf("com.android.settings")).copy(allowedActions = setOf(ActionType.SCROLL))
+            val res3 = exec.execute(tap("x"), sRead)
+            assertTrue(res3 is ActionResult.Failed)
+            assertTrue(engine.taps.isEmpty())
+            assertEquals("R3", audit.decisions.last().rule)
+        }
+
+    @Test
+    fun `every step appears in the audit log`() =
+        runTest {
+            val (exec, engine, audit) = setup(yes = true)
+
+            // Step 1: Send
+            exec.execute(tap("send"), scope())
+            assertEquals(1, audit.decisions.size)
+            assertEquals("R11", audit.decisions[0].rule)
+
+            // Step 2: Harmless tap
+            val c2 = ctx(el("chat", "Amma"))
+            engine.screen = c2.screen
+            val exec2 = TrustedExecutor(engine, TrustEngine(), FakeConfirmer(sayYes = true), audit) { c2 }
+            exec2.execute(tap("chat"), scope())
+            assertEquals(2, audit.decisions.size)
+            assertEquals(null, audit.decisions[1].rule) // default allow
+        }
 }
