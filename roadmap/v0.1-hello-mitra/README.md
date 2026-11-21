@@ -2,7 +2,7 @@
 
 **Phase 0–1 · Foundation** · Release channel: Developer phone only · Sprint day 1
 
-**Status:** 🟡 In progress (14/35 steps)
+**Status:** 🟡 In progress (19/35 steps)
 
 ## Goal
 
@@ -94,11 +94,11 @@ Mitra installs, hears English, speaks back, reads any screen and can tap, type a
 - **Accept:** On a 6 GB phone a fixed prompt returns valid JSON; tier detection is unit-tested.
 
 - [x] `LocalModel` interface + `FakeModel` for tests
-- [ ] Enable `litertlm-android` in the version catalog; check the API in the official docs
-- [ ] Model download on first launch with SHA-256 check
-- [ ] `DeviceTier` detection (A/B/C) + unit test
-- [ ] One shared model instance; cache the system prompt
-- [ ] Log time to first token
+- [x] Enable `litertlm-android` in the version catalog; check the API in the official docs
+- [x] ModelFiles path lookup + SHA-256 verify (in-app downloader deferred to T60)
+- [x] `DeviceTier` detection (A/B/C) + unit test
+- [x] One shared model instance; cache the system prompt
+- [x] Log time to first token
 
 ### [ ] T07 · Voice in and out (English) (P0 · 🏃 sprint)
 

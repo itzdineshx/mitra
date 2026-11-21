@@ -12,11 +12,7 @@ composeBom = "2025.07.00"
 biometric = "1.1.0"
 junit = "5.13.4"
 spotless = "7.2.1"
-# --- T60 (docs/DATA_SPEC.md): enable when wiring the database. Versions are guesses; let Android Studio suggest current ones.
-# room = "2.7.0"
-# sqlcipher = "4.6.0"   # Q-3, check licence for F-Droid
-# datastore = "1.1.1"
-# litertlm = "0.18.0"        # enable in shared/model when wiring the model (task T06)
+litertlm = "0.18.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -40,7 +36,7 @@ junit-launcher = { group = "org.junit.platform", name = "junit-platform-launcher
 # androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 # androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 # sqlcipher-android = { group = "net.zetetic", name = "sqlcipher-android", version.ref = "sqlcipher" }
-# litertlm-android = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", version.ref = "litertlm" }
+litertlm-android = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", version.ref = "litertlm" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

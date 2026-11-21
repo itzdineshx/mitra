@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.mitra.app.debug.DebugSection
 import com.mitra.engine.access.MitraAccessibilityService
 import com.mitra.ui.MitraTheme
 
@@ -84,5 +85,6 @@ private fun HomeScreen(
             Button(onClick = { onTask(task) }, enabled = task.isNotBlank()) { Text(stringResource(R.string.home_go)) }
             OutlinedButton(onClick = { /* T07: speech input */ }) { Text(stringResource(R.string.home_mic)) }
         }
+        DebugSection()
     }
 }

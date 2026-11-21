@@ -90,6 +90,14 @@ AGP `9.4.1`, Kotlin `2.4.20`, Coroutines `1.10.2`, Serialization `1.9.0`, Androi
 Why: establishes clean baseline build across pure Kotlin and Android modules with multi-flavour support (`direct` and `foss`).
 Consequences: build passes spotless, all unit tests, and both flavour assemblies out of the box.
 
+**D-018 · LiteRT-LM runtime and RAM tier thresholds (T06)** — Accepted · 2026-11-21
+Decision: enable `com.google.ai.edge.litertlm:litertlm-android:0.18.0` for on-device inference using CPU backend (`Backend.CPU()`). Device tiers are derived with tolerance for OS/hardware reserved memory from `ActivityManager.MemoryInfo.totalMem`:
+- Tier A (Gemma 4 E2B): $\ge 5.2$ GiB (`5_583_457_485` bytes; covers advertised 6 GB+ phones that typically report 5.4–5.8 GB).
+- Tier B (small model, T28): $\ge 2.6$ GiB (`2_791_728_742` bytes; covers advertised 3–5 GB phones reporting 2.7–4.8 GB).
+- Tier C (guide mode / cloud with consent): $< 2.6$ GiB.
+Why: advertised RAM is never reported in full by the kernel; realistic tolerances prevent falsely downgrading 6 GB devices.
+Consequences: `FakeModel` remains test default; `LiteRtLocalModel` executes off-thread when real model file is placed in `Android/data/com.mitra.app/files/models/`.
+
 ---
 
 ## Open questions (owner to decide)

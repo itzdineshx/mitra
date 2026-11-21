@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -51,6 +52,7 @@ dependencies {
     implementation(project(":engine-api"))
     implementation(project(":trust"))
     implementation(project(":agents"))
+    implementation(project(":model"))
     implementation(project(":voice"))
     implementation(project(":ui"))
     implementation(project(":engine-access"))
@@ -64,4 +66,5 @@ dependencies {
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.serialization.json)
 }
