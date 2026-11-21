@@ -243,7 +243,7 @@ python scripts/roadmap_status.py            # refresh the status board after tic
 
 **Picking work:**
 1. Pick work from `roadmap/<version>/README.md`, taking the lowest unfinished version and P0 first, only when its dependencies are done.
-2. Do one task per branch (`feat/T09-confirmer`).
+2. Work on the version branch (`phase1/<version-folder>`). One task = one commit, one pull request per version (see `docs/GIT_WORKFLOW.md`).
 
 **Before coding:**
 1. Give a short plan: the files you will change and the tests you will write.

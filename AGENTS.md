@@ -143,7 +143,7 @@ cd eval && pip install -r requirements.txt && pytest && python run.py --list
 
 ## 8. Workflow for one task
 
-1. **Pick** the task (§0). One task = one branch: `feat/T09-confirmer`.
+1. **Pick** the task (§0). Work on the **version branch** (`phase1/v0.1-hello-mitra` …), one commit per task: `feat(T09): …`. No branch per task. See `docs/GIT_WORKFLOW.md`.
 2. **Read** the version README, the task's Spec and the code under **Where**.
 3. **Plan** in a few lines: files to add or change, tests to write. For `modules/trust`, `modules/engine-api` or `modules/engine-access`, show the plan to the owner before coding.
 4. **Test first** where you can (always for trust and plugins).
@@ -175,6 +175,7 @@ cd eval && pip install -r requirements.txt && pytest && python run.py --list
 | Tests, benchmark, attack suite, metrics | `docs/TESTING.md` |
 | **Database, storage, retention, encryption, Delete all** | `docs/DATA_SPEC.md` |
 | Privacy promise (public text) | `PRIVACY.md` |
+| **Git: branches, commits, merging, safety** | `docs/GIT_WORKFLOW.md` |
 | Setting up the dev machine and phone | `docs/DEV_SETUP.md` |
 | Why something is the way it is | `docs/DECISIONS.md` |
 | Users, personas, product context | `docs/PROJECT_CONTEXT.md`, `docs/MitraOS_PRD_v3.0.pdf` |

@@ -1,5 +1,5 @@
-## Task
-<!-- e.g. T09 · TrustedExecutor + Confirmer + AuditLog — roadmap/v0.2-trust/README.md -->
+## Version
+<!-- One pull request per version (e.g. v0.1 — Hello Mitra). List the tasks and exit-criteria evidence. -->
 
 ## What changed
 <!-- One or two lines. -->

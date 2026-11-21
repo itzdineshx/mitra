@@ -188,9 +188,8 @@ Before the first public release: verify the developer identity and register the 
 
 ## 7. Branch and build strategy
 
-- `main` — always releasable; tagged per version (`v0.4.0`)
-- `develop` — integration branch
-- `feature/<name>` — one branch per feature, merged after review and green CI
+- `main` — always releasable; tagged per version (`v0.1.0` …)
+- `phase<N>/<version>` — one working branch per roadmap version (e.g. `phase1/v0.1-hello-mitra`); one commit per task; merged to `main` with one pull request when the version's exit criteria are met (see `docs/GIT_WORKFLOW.md`)
 - Flavours: `direct`, `foss`
 - CI (GitHub Actions): build both flavours, run unit tests, trust-engine tests and attack regression tests on every merge; attach APKs to GitHub releases
 

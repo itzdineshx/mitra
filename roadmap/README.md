@@ -37,8 +37,8 @@ Legend: ⬜ not started · 🟡 in progress · ✅ done · **P0** must have · *
 1. Go to the **lowest version** that is not ✅.
 2. In it, take the first task that is not ticked, is **P0**, and whose **Depends on** tasks are all ticked. If none, take P1, then P2.
 3. Read the files in **Read before starting** and the task's **Spec**.
-4. Work through the task's steps in order. One task = one branch = one pull request (`feat/T09-confirmer`).
-5. When a step is merged and tested, tick it here **in the same pull request**. Tick the task heading `[x]` only when **Accept** is proven.
+4. Work through the task's steps in order. Work on the version branch (`phase1/<version-folder>`). One task = one commit (`feat(T09): …`); one pull request per version (see `docs/GIT_WORKFLOW.md`).
+5. When a step is merged and tested, tick it here **in the same commit**. Tick the task heading `[x]` only when **Accept** is proven.
 6. Do not start a later version early, except tasks with no dependencies that unblock others (ask the owner).
 
 Task IDs (T01, T02 …) never change and are never reused. New work gets the next free number (currently **T61**) and goes into the version where it belongs.
